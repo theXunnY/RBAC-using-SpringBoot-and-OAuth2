@@ -57,7 +57,7 @@ public class SecurityConfig {
 			
 		});
 
-		
+		System.out.println();
 //		httpSecurity.csrf(csrf->csrf.ignoringRequestMatchers("/logout"));
 
 		
@@ -84,6 +84,5 @@ public class SecurityConfig {
 		return httpSecurity.build();
 		
 	}
-	
 	
 }
