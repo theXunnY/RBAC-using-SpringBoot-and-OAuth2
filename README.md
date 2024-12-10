@@ -83,7 +83,7 @@ This project implements a robust Role-Based Access Control (RBAC) system using O
    Configure the database connection in application.yml or application.properties.
    
   
-3. **Setup the Database:**   
+3. **Build and Run:**   
    ```bash
    mvn clean install
    mvn spring-boot:run
