@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <title>Contact Me</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css" integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css">
+</head>
+<body>
+
+<main class="h-screen w-full flex flex-col">
+  <!-- Include Navbar -->
+  <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+  <!-- Contact Section -->
+  <section class="bg-blue-50 dark:bg-gray-900 flex-grow h-full w-full">
+    <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 grid lg:grid-cols-2 gap-8 lg:gap-16">
+      <div class="flex flex-col justify-center">
+        <h1 class="mb-4 text-4xl font-extrabold tracking-tight leading-none text-gray-900 md:text-5xl lg:text-6xl dark:text-white">Contact Me</h1>
+        <p class="mb-6 text-lg font-normal text-gray-500 lg:text-xl dark:text-gray-400">
+          Have any questions or want to get in touch? Fill out the form below and I'll get back to you as soon as possible.
+        </p>
+      </div>
+      <div>
+        <div class="w-full lg:max-w-xl p-6 space-y-8 sm:p-8 bg-white rounded-lg shadow-xl dark:bg-gray-800">
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Send me a message</h2>
+          <form id="form" class="mt-8 space-y-6" method="post" action="/submit-contact">
+            <!-- Hidden access_key field -->
+            <input type="hidden" id="access_key" name="access_key" value="3ea14f8d-2782-4dab-87ea-008e7cb85108" />
+
+            <div>
+              <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your Name</label>
+              <input type="text" id="name" name="name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="John Doe" required />
+            </div>
+            <div>
+              <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your Email</label>
+              <input type="email" id="email" name="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="email@example.com" required />
+            </div>
+            <div>
+              <label for="message" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your Message</label>
+              <textarea id="message" name="message" rows="4" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write your message here" required></textarea>
+            </div>
+
+            <button type="submit" class="w-full sm:w-auto px-5 py-3 text-base font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+              Send Message
+            </button>
+          </form>
+          
+          <!-- Response message -->
+          <div id="result" class="text-center mt-4 text-red-500"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer Section -->
+  <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
+<script src="js/script.js"></script>
+
+<script>
+// JavaScript for form submission
+const form = document.getElementById('form');
+const result = document.getElementById('result');
+
+form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    // Validate form fields before submission
+    if (!validateForm()) {
+        return; // Exit function if validation fails
+    }
+
+    const formData = new FormData(form);
+    const object = Object.fromEntries(formData);
+    const json = JSON.stringify(object);
+
+    result.innerHTML = "Please wait...";
+    result.classList.remove('text-green-500', 'text-red-500');  // Remove any previous success or error classes
+    result.classList.add('text-blue-500'); // Show the "please wait" message in blue
+
+    fetch('https://api.web3forms.com/submit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: json
+        })
+        .then(async (response) => {
+            let json = await response.json();
+            if (response.status == 200) {
+                result.innerHTML = json.message;  // Success message
+                result.classList.remove('text-red-500');  // Remove red class if present
+                result.classList.add('text-green-500');   // Add green class for success
+            } else {
+                console.log(response);
+                result.innerHTML = json.message;  // Error message
+                result.classList.remove('text-green-500');  // Remove green class if present
+                result.classList.add('text-red-500');       // Add red class for error
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            result.innerHTML = "Something went wrong!";  // General error
+            result.classList.remove('text-green-500');  // Remove green class if present
+            result.classList.add('text-red-500');       // Add red class for error
+        })
+        .then(() => {
+            form.reset();
+            setTimeout(() => {
+                result.style.display = "none";
+            }, 3000);
+        });
+});
+
+function validateForm() {
+    let isValid = true;
+    // Validate each required input field
+    form.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], textarea').forEach(field => {
+        if (!field.value.trim()) {
+            isValid = false;
+            // Optionally you can add specific validation messages for each field
+            result.innerHTML = `${field.placeholder} is required.`;
+            result.classList.remove('text-green-500');  // Remove green class if present
+            result.classList.add('text-red-500');       // Add red class for error
+            return;
+        }
+    });
+
+    return isValid;
+}
+</script>
+
+
+</body>
+</html>
